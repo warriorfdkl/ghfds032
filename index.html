@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сканер Еды</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="camera-container">
+            <video id="camera" autoplay playsinline></video>
+            <canvas id="overlay"></canvas>
+            <div id="labels-container"></div>
+            <div class="camera-controls">
+                <button id="switchCamera" class="control-button">
+                    <img src="switch-camera.svg" alt="Переключить камеру">
+                </button>
+                <button id="captureButton" class="capture-button">
+                    <div class="capture-button-inner"></div>
+                </button>
+                <button id="flashButton" class="control-button">
+                    <img src="flash.svg" alt="Вспышка">
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 
