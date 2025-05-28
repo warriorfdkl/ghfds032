@@ -1,7 +1,7 @@
 import os
 import logging
-from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup, MenuButtonWebApp
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
+from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext, Filters
 from dotenv import load_dotenv
 import openai
 from PIL import Image
@@ -22,16 +22,7 @@ WEBAPP_URL = os.getenv('WEBAPP_URL')
 # Инициализация клиента OpenAI
 openai.api_key = OPENAI_API_KEY
 
-async def setup_menu_button(application: Application):
-    """Настраивает кнопку меню для мини-приложения."""
-    await application.bot.set_chat_menu_button(
-        menu_button=MenuButtonWebApp(
-            text="🔍 Сканер Еды",
-            web_app=WebAppInfo(url=WEBAPP_URL)
-        )
-    )
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(update: Update, context: CallbackContext):
     """Отправляет сообщение с кнопкой для открытия веб-приложения."""
     keyboard = [
         [InlineKeyboardButton(
@@ -56,7 +47,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(welcome_message, reply_markup=reply_markup)
 
-async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def button_callback(update: Update, context: CallbackContext):
     """Обработка нажатий на кнопки."""
     query = update.callback_query
     await query.answer()
@@ -74,7 +65,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         await query.message.reply_text(help_text)
 
-async def handle_webapp_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_webapp_data(update: Update, context: CallbackContext):
     """Обработка фото, полученного из веб-приложения."""
     try:
         # Получаем данные фото
@@ -119,7 +110,7 @@ async def handle_webapp_data(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.error(f"Ошибка обработки данных: {str(e)}")
         await update.message.reply_text("Извините, произошла ошибка при обработке фото. Пожалуйста, попробуйте еще раз.")
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def help_command(update: Update, context: CallbackContext):
     """Отправляет сообщение при команде /help."""
     help_text = (
         "🤖 Помощь по использованию Сканера Еды\n\n"
@@ -135,23 +126,23 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(help_text)
 
-async def post_init(application: Application):
-    """Действия после инициализации бота."""
-    await setup_menu_button(application)
-
 def main():
     """Запуск бота."""
-    # Создаем приложение
-    application = Application.builder().token(TELEGRAM_TOKEN).post_init(post_init).build()
+    # Создаем Updater и передаем ему токен бота
+    updater = Updater(TELEGRAM_TOKEN, use_context=True)
+
+    # Получаем диспетчер для регистрации обработчиков
+    dp = updater.dispatcher
 
     # Добавляем обработчики
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_webapp_data))
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("help", help_command))
+    dp.add_handler(CallbackQueryHandler(button_callback))
+    dp.add_handler(MessageHandler(Filters.status_update.web_app_data, handle_webapp_data))
 
     # Запускаем бота
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == '__main__':
     main() 
