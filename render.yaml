@@ -2,37 +2,8 @@ services:
   - type: web
     name: food-scanner-web
     env: python
-    buildCommand: |
-      # Install Python dependencies
-      pip install -r requirements.txt
-      
-      # Install Node.js using nvm
-      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-      export NVM_DIR="$HOME/.nvm"
-      [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-      nvm install 18
-      nvm use 18
-      
-      # Verify installations
-      python --version
-      node --version
-      npm --version
-      
-      # Debug: List directories
-      ls -la
-      
-      # Build frontend
-      cd frontend
-      ls -la
-      npm install
-      npm run build
-      cd ..
-      
-      # Debug: Check if dist directory was created
-      ls -la frontend/dist
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.0
-      - key: NODE_VERSION
-        value: 18.0.0 
+        value: 3.11.0 
