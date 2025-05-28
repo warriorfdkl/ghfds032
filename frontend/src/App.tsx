@@ -10,7 +10,7 @@ interface NutritionData {
 }
 
 function App() {
-  const [nutritionData, setNutritionData] = useState<NutritionData>({
+  const [nutritionData] = useState<NutritionData>({
     proteins: 0,
     carbs: 0,
     fats: 0,
