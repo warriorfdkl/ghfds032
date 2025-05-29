@@ -1,7 +1,7 @@
 import os
 import logging
 from telegram import Update, WebAppInfo, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, CallbackContext, Filters
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 from dotenv import load_dotenv
 import openai
 from PIL import Image
@@ -17,37 +17,22 @@ logger = logging.getLogger(__name__)
 # Получение переменных окружения
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-WEBAPP_URL = os.getenv('WEBAPP_URL')
+WEB_APP_URL = "https://localhost:5173"
 
 # Инициализация клиента OpenAI
 openai.api_key = OPENAI_API_KEY
 
-async def start(update: Update, context: CallbackContext):
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Отправляет сообщение с кнопкой для открытия веб-приложения."""
-    keyboard = [
-        [InlineKeyboardButton(
-            "📸 Открыть сканер еды",
-            web_app=WebAppInfo(url=WEBAPP_URL)
-        )],
-        [InlineKeyboardButton(
-            "ℹ️ Как пользоваться",
-            callback_data="help"
-        )]
-    ]
+    keyboard = [[InlineKeyboardButton(
+        "Open Food Tracker", 
+        web_app=WebAppInfo(url=WEB_APP_URL)
+    )]]
+    
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    welcome_message = (
-        "👋 Добро пожаловать в Сканер Еды!\n\n"
-        "Это мини-приложение поможет вам:\n"
-        "🔍 Распознавать продукты на фото\n"
-        "📊 Узнавать калорийность блюд\n"
-        "🥗 Получать информацию о составе\n\n"
-        "Нажмите на кнопку ниже или используйте кнопку меню для быстрого доступа к сканеру."
-    )
-    
-    await update.message.reply_text(welcome_message, reply_markup=reply_markup)
+    await update.message.reply_text("Welcome to Food Tracker!", reply_markup=reply_markup)
 
-async def button_callback(update: Update, context: CallbackContext):
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка нажатий на кнопки."""
     query = update.callback_query
     await query.answer()
@@ -65,7 +50,7 @@ async def button_callback(update: Update, context: CallbackContext):
         )
         await query.message.reply_text(help_text)
 
-async def handle_webapp_data(update: Update, context: CallbackContext):
+async def handle_webapp_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка фото, полученного из веб-приложения."""
     try:
         # Получаем данные фото
@@ -110,7 +95,7 @@ async def handle_webapp_data(update: Update, context: CallbackContext):
         logger.error(f"Ошибка обработки данных: {str(e)}")
         await update.message.reply_text("Извините, произошла ошибка при обработке фото. Пожалуйста, попробуйте еще раз.")
 
-async def help_command(update: Update, context: CallbackContext):
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Отправляет сообщение при команде /help."""
     help_text = (
         "🤖 Помощь по использованию Сканера Еды\n\n"
@@ -128,21 +113,17 @@ async def help_command(update: Update, context: CallbackContext):
 
 def main():
     """Запуск бота."""
-    # Создаем Updater и передаем ему токен бота
-    updater = Updater(TELEGRAM_TOKEN, use_context=True)
-
-    # Получаем диспетчер для регистрации обработчиков
-    dp = updater.dispatcher
+    # Создаем приложение
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
 
     # Добавляем обработчики
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help_command))
-    dp.add_handler(CallbackQueryHandler(button_callback))
-    dp.add_handler(MessageHandler(Filters.status_update.web_app_data, handle_webapp_data))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CallbackQueryHandler(button_callback))
+    application.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_webapp_data))
 
     # Запускаем бота
-    updater.start_polling()
-    updater.idle()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == '__main__':
     main() 
