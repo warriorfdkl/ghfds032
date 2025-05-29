@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import './App.css'
-import WebApp from '@twa-dev/sdk'
 import { HomeIcon, CameraIcon, StatsIcon, SettingsIcon, ProteinIcon, CarbsIcon, FatsIcon } from './components/Icons'
 import { useNutritionStore } from './store/nutritionStore'
 import FoodAnalysis from './components/FoodAnalysis'
@@ -9,9 +8,10 @@ function App() {
   const { dailyCalories, dailyProtein, dailyCarbs, dailyFat } = useNutritionStore()
 
   useEffect(() => {
-    WebApp.ready()
-    // Устанавливаем тему Telegram
-    document.documentElement.className = WebApp.colorScheme
+    // Telegram WebApp initialization
+    const webapp = (window as any).Telegram.WebApp
+    webapp.ready()
+    webapp.expand()
   }, [])
 
   return (

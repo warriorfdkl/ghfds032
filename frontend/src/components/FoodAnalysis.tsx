@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useNutritionStore } from '../store/nutritionStore';
+import { CameraIcon } from './Icons'
 
 interface AnalysisResult {
   name: string;
@@ -105,17 +106,21 @@ const FoodAnalysis: React.FC = () => {
     }
   };
 
+  const handleCameraClick = () => {
+    const webapp = (window as any).Telegram.WebApp
+    webapp.showScanQrPopup({
+      text: 'Point your camera at food'
+    })
+  }
+
   return (
     <>
       {/* Кнопка открытия камеры */}
       <button
-        onClick={startCamera}
+        onClick={handleCameraClick}
         className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center shadow-lg hover:bg-purple-600 transition-colors"
       >
-        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-          <circle cx="12" cy="13" r="4" />
-        </svg>
+        <CameraIcon />
       </button>
 
       {/* Модальное окно с камерой */}

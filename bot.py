@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Получение переменных окружения
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-WEB_APP_URL = "https://localhost:5173"
+WEB_APP_URL = "https://ghfds032.vercel.app"
 
 # Инициализация клиента OpenAI
 openai.api_key = OPENAI_API_KEY
