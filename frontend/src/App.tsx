@@ -1,22 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import './App.css'
 import WebApp from '@twa-dev/sdk'
 import { HomeIcon, CameraIcon, StatsIcon, SettingsIcon, ProteinIcon, CarbsIcon, FatsIcon } from './components/Icons'
-
-interface NutritionData {
-  proteins: number
-  carbs: number
-  fats: number
-  calories: number
-}
+import { useNutritionStore } from './store/nutritionStore'
+import FoodAnalysis from './components/FoodAnalysis'
 
 function App() {
-  const [nutritionData] = useState<NutritionData>({
-    proteins: 0,
-    carbs: 0,
-    fats: 0,
-    calories: 1615 // Целевое количество калорий
-  })
+  const { dailyCalories, dailyProtein, dailyCarbs, dailyFat } = useNutritionStore()
 
   useEffect(() => {
     WebApp.ready()
@@ -48,7 +38,7 @@ function App() {
         <div className="nutrition-card">
           <div className="today-header">
             <span>сегодня</span>
-            <span className="calories">{nutritionData.calories} ккал</span>
+            <span className="calories">{dailyCalories} ккал</span>
           </div>
           
           <div className="nutrition-stats">
@@ -59,9 +49,9 @@ function App() {
               <div className="stat-info">
                 <span className="stat-label">Белки</span>
                 <div className="stat-bar">
-                  <div className="stat-fill" style={{width: `${(nutritionData.proteins/100) * 100}%`}} />
+                  <div className="stat-fill" style={{width: `${(dailyProtein/100) * 100}%`}} />
                 </div>
-                <span className="stat-value">{nutritionData.proteins}/100 г</span>
+                <span className="stat-value">{dailyProtein}/100 г</span>
               </div>
             </div>
             
@@ -72,9 +62,9 @@ function App() {
               <div className="stat-info">
                 <span className="stat-label">Углеводы</span>
                 <div className="stat-bar">
-                  <div className="stat-fill" style={{width: `${(nutritionData.carbs/201) * 100}%`}} />
+                  <div className="stat-fill" style={{width: `${(dailyCarbs/201) * 100}%`}} />
                 </div>
-                <span className="stat-value">{nutritionData.carbs}/201 г</span>
+                <span className="stat-value">{dailyCarbs}/201 г</span>
               </div>
             </div>
             
@@ -85,9 +75,9 @@ function App() {
               <div className="stat-info">
                 <span className="stat-label">Жиры</span>
                 <div className="stat-bar">
-                  <div className="stat-fill" style={{width: `${(nutritionData.fats/44) * 100}%`}} />
+                  <div className="stat-fill" style={{width: `${(dailyFat/44) * 100}%`}} />
                 </div>
-                <span className="stat-value">{nutritionData.fats}/44 г</span>
+                <span className="stat-value">{dailyFat}/44 г</span>
               </div>
             </div>
           </div>
@@ -98,9 +88,9 @@ function App() {
         <button className="nav-button">
           <HomeIcon />
         </button>
-        <button className="nav-button camera-button">
-          <CameraIcon />
-        </button>
+        <div className="camera-button-container">
+          <FoodAnalysis />
+        </div>
         <button className="nav-button">
           <StatsIcon />
         </button>
